@@ -9,7 +9,7 @@ URL = ''
 MODEL = ''
 LLM = None
 TOKENS = 1024
-V = True
+V = True #Verbose mode
 _CONTEXT = {}
 
 
@@ -93,6 +93,9 @@ def _attrCreate(self, name):
         self.__dict__[name] = None
 
 def cls(name, description, attrs =  {}):
+    '''
+    Generates the code for the class, then returns an instance of that class
+    '''
     prompt = f'''Create a class in python named {name} with the docstring and description {description} that has the following attributes: {list(attrs.keys())}. 
             Generate only the python code without anything else.'''
     result = _chat(prompt)
@@ -102,3 +105,24 @@ def cls(name, description, attrs =  {}):
     exec(f'''{name}.__getattr__ = _attrCreate''', globals = globals())
     _CONTEXT[name] = [result]
     return eval(f'''{name}(**{attrs})''')
+
+def save(output, mode = 'w'):
+    '''
+    Saves generated code to output
+    '''
+    if mode not in ['w', 'a']:
+        raise Exception('To save the code to a file, you must access it to write or append to it, set mode as either "w" or "a".')
+    with open(output, mode) as f:
+        for elem, code in _CONTEXT.items():
+            base_def = code[0].lstrip()
+            ident = base_def.split('\n')[1]
+            print(ident)
+            ident = len(ident) - len(ident.lstrip())
+            ident = ''.join(ident*[' '])
+            for i in range(1, len(code)):
+                lines = code[i].splitlines()
+                definition = ident + lines[0].lstrip()
+                method = [definition] + [ident + line for line in lines[1:]]
+                method = '\n'.join(method)
+                base_def += '\n' +  method
+            f.write(base_def)
