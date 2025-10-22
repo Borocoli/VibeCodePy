@@ -40,8 +40,32 @@ After the class is created, you can call it's methods, even if they don't exist 
  ``` python
 obj.unknown_method(parameters) # Use the comment on the same line to explain what it should do
 ```
-## TODO
-* Save the generated code in a .py file
-* Add support for functions
-* Add ways to control what python modules to use
+To save the generated code use:
+``` python
+vibe.save(output.py) #Creates / Overwrites output.py
+```
+Or 
+``` python
+vibe.save(output.py, 'a') #Appends to output.py
+```
+### Full Example
+``` python
+import vibecode as vibe
 
+vibe.API = 'your-api-key'
+vibe.URL = 'your-url'
+vibe.connect_llm()
+
+descr = '''
+    A class to test a string.
+    When initialized, an object of this class will print "Received string: {string}"
+    It has 2 methods:
+    is_long() - checks if the string is longer than 100 characters
+    is_Shakespeare() - checks if the string is a famous quote from Shakespeare
+'''
+n = vibe.cls('Test', descr, attrs = {'string' : 'Et tu Brutus?'})
+print(n.__doc__)
+print(n.a((1, 2), 2.34e10, 1, 'abcd', 'a, b, c, {2}', {1: 3, 3: 4}, (4, 5))) # Returns the closest element to the string in terms of hash value some parameters might not be hashable
+print(n.a)
+vibe.save('test_module.py')
+```
