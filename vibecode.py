@@ -110,7 +110,7 @@ def save(output, mode = 'w'):
     '''
     Saves generated code to output
     '''
-    if mode not in ['w', 'a']:
+    if not mode in ['w', 'a']:
         raise Exception('To save the code to a file, you must access it to write or append to it, set mode as either "w" or "a".')
     with open(output, mode) as f:
         for elem, code in _CONTEXT.items():
