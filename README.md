@@ -1,5 +1,5 @@
 # VibeCodePy
-Write Python code like it already exists. Automatically creates classes and methods at runtime, powered by vibe coding + AI. No errors, no boilerplate, just flow. (Currently in alpha: class/method creation only.)
+Write Python code like it already exists. Automatically creates functions, classes and methods at runtime, powered by vibe coding + AI. No errors, no boilerplate, just flow. (Currently in alpha)
 
 ## Warning
 This project is designed to integrate with LLMs to generate and execute Python code at runtime. The code you write may trigger dynamic, AI-generated code to be created and executed — potentially including malicious or unintended behavior.
@@ -20,21 +20,24 @@ Import the module.
  ``` python
 import vibecode as vibe
 ```
-Set the API key and the URL for the server.
- ``` python
-vibe.API = 'your-api-key'
-vibe.URL = 'your-url'
-```
 Connect to the LLM
  ``` python
-vibe.connect_llm()
+vibe.connect_llm('your-url')
+```
+Or if you have an API key
+ ``` python
+vibe.connect_llm('your-url', 'your-api-key', 'model')
+```
+To create a function:
+ ``` python
+obj = vibe.f.Function_name(parameters) # Description of the function
 ```
 To create a class:
  ``` python
-obj = vibe.cls('Class_name', descr, attrs = {})
+obj = vibe.c.Class_name(_description=descr, attrs) # Optional comment for more control over the description
 ```
 * descr - the docstring of the class that also serves as it's description
-* attrs - dictionary of the class' attributes, the keys are the attributes and the values will be used to initialize the instance obj
+* attrs - class' attributes
   
 After the class is created, you can call it's methods, even if they don't exist yet:
  ``` python
@@ -52,9 +55,10 @@ vibe.save(output.py, 'a') #Appends to output.py
 ``` python
 import vibecode as vibe
 
-vibe.API = 'your-api-key'
-vibe.URL = 'your-url'
-vibe.connect_llm()
+vibe.connect_llm('your-url')
+
+result_func = vibe.f.closest_hash(1, list(range(10))) # Finds the element from the second parameter, iterable, that has the closest hash value to the first parameter
+print(result_func)
 
 descr = '''
     A class to test a string.
@@ -63,9 +67,17 @@ descr = '''
     is_long() - checks if the string is longer than 100 characters
     is_Shakespeare() - checks if the string is a famous quote from Shakespeare
 '''
-n = vibe.cls('Test', descr, attrs = {'string' : 'Et tu Brutus?'})
+
+n = vibe.c.Test(_description=descr, 'Et tu Brutus?')
 print(n.__doc__)
 print(n.a((1, 2), 2.34e10, 1, 'abcd', 'a, b, c, {2}', {1: 3, 3: 4}, (4, 5))) # Returns the closest element to the string in terms of hash value some parameters might not be hashable
 print(n.a)
-vibe.save('test_module.py')
+vibe.save('module.py', 'w')
+
 ```
+
+## Limitations
+* In generated classes, the __getattr__ method should not be overwritten/used
+* Function and method description is limited to the comment on the same line
+* When calling a class for the first time, you must provide the _description parameter, after that it should not be used anymore for creating new objects of that class
+* Creation of methods is only available for classes generated using this module
