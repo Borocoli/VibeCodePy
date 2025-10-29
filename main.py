@@ -4,11 +4,13 @@ import linecache
 import re
 import tokenize
 import io
+from .prompt import BasePromptMaker
 
 LLM = None
 TOKENS = 1024
 context = {}
 MODEL = ''
+PROMPTER = BasePromptMaker()
 
 def connect_llm(URL, api='', model = ''):
     '''
