@@ -1,4 +1,4 @@
-from .main import getLine, chat, context
+from .main import getLine, chat, context, PROMPTER
 
 
 def __getattr__(name):
@@ -8,7 +8,7 @@ def __getattr__(name):
     def _catchParams(*args, **kwargs):
         pargs = [type(a).__name__ for a in args]
         pkargs = [str(k) + ' of type ' + type(v).__name__ for k, v in kwargs.items()]
-        prompt = f''' In python create the function named {name} described by the user as: {comment}. In one of it's calls, it has parameters: {' , '.join(pargs)} and the keyword parameters: {' , '.join(pkargs)}. Generate only the python code for the function and nothing else.'''
+        prompt = PROMPTER.prompt(name, 'f', comment, pargs, pkargs)
         response = chat(prompt)
         context[name] = response
         print(response)
