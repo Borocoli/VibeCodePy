@@ -1,4 +1,4 @@
-from .main import getLine, chat, context
+from .main import getLine, chat, context, PROMPTER
 import re
 
 
@@ -20,9 +20,7 @@ def _getat(self, name):
     def _catchParams(*args, **kwargs):
         pargs = [type(a).__name__ for a in args]
         pkargs = [str(k) + ' of type ' + type(v).__name__ for k, v in kwargs.items()]
-        prompt = f''' In python create the method named {name} of the class defined as:
-            {context[self.__class__.__name__][0]}
-            The method is described by the user as: {comment}. In one of it's calls, it has parameters: {' , '.join(pargs)} and the keyword parameters: {' , '.join(pkargs)}. Generate only the python code and nothing else'''
+        prompt = PROMPTER.prompt(name, 'm', comment, pargs, pkargs, owner_class = self.__class__.__name__, class_def = context[self.__class__.__name__][0])
         response = chat(prompt)
         print(response)
         _addM(self.__class__.__name__, response)
@@ -48,9 +46,7 @@ def __getattr__(name):
         descr = kwargs['_description']
         del kwargs['_description']
         pkargs = [str(k) + ' of type ' + type(v).__name__ for k, v in kwargs.items()]
-        prompt = f''' In python create the class named {name} with the docstring:
-            {descr}
-            Which is described by the user as: {comment}. In one of it's calls, it has parameters: {' , '.join(pargs)} and the keyword parameters: {' , '.join(pkargs)}. Generate only the python code and nothing else'''
+        prompt = PROMPTER.prompt(name, 'c', comment, pargs, pkargs, description=descr)
         response = chat(prompt)
         base_def = response.lstrip()
         ident = base_def.split('\n')[1]
