@@ -1,16 +1,16 @@
 from .main import getLine, chat, context, PROMPTER
+from .abscontext import ContextObj
 import re
 
 
 def _addM(name, method):
     global context
-    ident = context[name][1]
+    ident = context[name].ident
     lines = method.splitlines()
     definition = ident + lines[0].lstrip()
     method = [definition] + [ident + line for line in lines[1:]]
     method = '\n'.join(method)
-    context[name][0] += '\n' +  method
-    print(context[name][0])
+    context[name].code_def += '\n' +  method
 
 
 def _getat(self, name):
@@ -20,7 +20,11 @@ def _getat(self, name):
     def _catchParams(*args, **kwargs):
         pargs = [type(a).__name__ for a in args]
         pkargs = [str(k) + ' of type ' + type(v).__name__ for k, v in kwargs.items()]
-        prompt = PROMPTER.prompt(name, 'm', comment, pargs, pkargs, owner_class = self.__class__.__name__, class_def = context[self.__class__.__name__][0])
+        descr = None
+        if '_description' in kwargs:
+            descr = kwargs['_description']
+            del kwargs['_description']
+        prompt = PROMPTER.prompt(name, 'm', comment, pargs, pkargs, description = descr ,owner_class = context[self.__class__.__name__])
         response = chat(prompt)
         print(response)
         _addM(self.__class__.__name__, response)
@@ -53,10 +57,12 @@ def __getattr__(name):
         ident = len(ident) - len(ident.lstrip())
         ident = ''.join(ident*[' '])
 
-        context[name] = [response, ident]
         print(response)
         exec(response, globals = globals())
         globals()[name].__getattr__ = _getat
+        
+        tmp_context = ContextObj(name, response, descr, ident=ident)
+        context.add_definition(tmp_context)
         return globals()[name](*args, **kwargs)
     return _catchParams
 
