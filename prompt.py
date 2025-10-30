@@ -1,68 +1,12 @@
 from abc import ABC, abstractmethod
+from .abscontext import ContextObj
 
 class PromptMaker(ABC):
     def __init__(self):
         super().__init__()
 
-    def pre(self):
-        '''
-        First info passed into the prompt.
-        '''
-        pass
-    def what(self, tip):
-        '''
-        What code to write.
-        tip - what type of code the LLM is requested to write, it takes the following values:
-            f - function
-            c - class
-            m - method
-        '''
-        pass
-    def comment(self, comment):
-        '''
-        How to add to the prompt user comments.
-        '''
-        pass
-    def no_comment(self):
-        '''
-        What to write if there are no user comments.
-        '''
-        pass
-    def owner_class(self, owner_class, class_def):
-        '''
-        How to add the method's class to the prompt.
-        '''
-        pass
-    def description(self, description):
-        '''
-        How to add the docstring of the code to the prompt
-        '''
-        pass
-    def positional_args(self, pargs):
-        '''
-        How to add the positional arguments to the prompt
-        '''
-        pass
-    def keyword_args(self, kargs):
-        '''
-        How to add the keyword arguments to the prompt
-        '''
-
-        pass
-    def no_parameters(self):
-        '''
-        What to add to the prompt if there are no parameters 
-        '''
-
-        pass
-    def post(self):
-        '''
-        What to add at the end of the prompt
-        '''
-
-        pass
     @abstractmethod
-    def prompt(self, name: str, tip: int, comment: str, pargs: list, kargs: list, description = None, owner_class=None, class_def = None) -> str:
+    def prompt(self, name: str, tip: int, comment: str, pargs: list, kargs: list, description = None, owner_class: ContextObj = None) -> str:
         '''
         Generates the prompt and returns it as a string
         '''
@@ -117,11 +61,11 @@ class BasePromptMaker(PromptMaker):
         '''
         return self.no_comment_str
 
-    def owner_class(self, owner_class, class_def):
+    def owner_class(self,  owner_class: ContextObj):
         '''
         How to add the method's class to the prompt.
         '''
-        return self.owner_class_str.format(c=owner_class, class_def = class_def)
+        return self.owner_class_str.format(c=owner_class.name, class_def = owner_class.code_def)
 
     def description(self, description, tip):
         '''
@@ -152,7 +96,7 @@ class BasePromptMaker(PromptMaker):
         '''
         return self.post_str.format(tip=tip)
 
-    def prompt(self, name: str, tip: str, comment: str, pargs: list = None, kargs: list = None, description = None, owner_class=None, class_def = None) -> str:
+    def prompt(self, name: str, tip: str, comment: str, pargs: list = None, kargs: list = None, description = None, owner_class: ContextObj=None) -> str:
         '''
         Generates the prompt and returns it as a string
         '''
@@ -160,10 +104,7 @@ class BasePromptMaker(PromptMaker):
         prompt = self.pre()
         prompt += self.what(tip, name) + ' '
         if owner_class:
-            if class_def:
-                prompt += self.owner_class(owner_class, class_def) + ' '
-            else:
-                raise Exception('If you have passed an owner class, you must also pass the class\' definition')
+                prompt += self.owner_class(owner_class) + ' '
         else:
             prompt += '. '
         if description:
