@@ -1,4 +1,4 @@
-# VibeCodePy
+# FocusedPythonicVibes
 Write Python code like it already exists. Automatically creates functions, classes and methods at runtime, powered by vibe coding + AI. No errors, no boilerplate, just flow. (Currently in alpha)
 
 ## Warning
@@ -18,7 +18,7 @@ pip install openai
 
 Import the module.
  ``` python
-import vibecode as vibe
+import FocusedPythonicVibes as vibe
 ```
 Connect to the LLM
  ``` python
